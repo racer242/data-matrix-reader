@@ -9,13 +9,13 @@ window.dataMatrixConfig = {
    * Показывать консоль поверх экрана
    * По умолчанию false
    */
-  showConsole: false,
+  showConsole: true,
 
   /**
    * URL API для отправки данных сканирования
    * JSON-заглушка: /response.json
    */
-  apiURL: '/response.json',
+  apiURL: "/response.json",
 
   /**
    * Вызывается при ошибке доступа к камере (техническая ошибка)
@@ -83,4 +83,4 @@ window.dataMatrixConfig = {
 /**
  * Глобальный JWT токен для авторизации запросов
  */
-window.JWT = '';
+window.JWT = "";
