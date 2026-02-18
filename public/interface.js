@@ -13,14 +13,9 @@ window.dataMatrixConfig = {
 
   /**
    * URL API для отправки данных сканирования
-   * JSON-заглушка: https://jsonplaceholder.typicode.com/posts
+   * JSON-заглушка: /response.json
    */
-  apiURL: 'https://jsonplaceholder.typicode.com/posts',
-
-  /**
-   * JWT токен для авторизации запросов
-   */
-  JWT: '',
+  apiURL: '/response.json',
 
   /**
    * Вызывается при ошибке доступа к камере (техническая ошибка)
@@ -70,7 +65,7 @@ window.dataMatrixConfig = {
 
   /**
    * Вызывается при успешной отправке данных на сервер
-   * @param {Object} response - ответ сервера
+   * @param {Object} response - ответ сервера { result, errorText, data, JWT }
    */
   apiSuccess: function (response) {
     console.log("apiSuccess:", response);
@@ -84,3 +79,8 @@ window.dataMatrixConfig = {
     console.log("apiError:", error);
   },
 };
+
+/**
+ * Глобальный JWT токен для авторизации запросов
+ */
+window.JWT = '';

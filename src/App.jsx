@@ -6,6 +6,18 @@ import "./App.css";
 function App() {
   const [logs, setLogs] = useState([]);
 
+  const handleLog = useCallback((type, data) => {
+    const message =
+      typeof data === "object"
+        ? `${type}: ${JSON.stringify(data, null, 2)}`
+        : `${type}: ${data}`;
+
+    setLogs((prev) => [
+      ...prev.slice(-19),
+      { type: "log", message, time: new Date().toLocaleTimeString() },
+    ]);
+  }, []);
+
   const sendToApi = useCallback(async (codeData) => {
     const config = window.dataMatrixConfig;
     if (!config?.apiURL) {
@@ -18,29 +30,30 @@ function App() {
       };
 
       // Добавляем JWT токен в заголовок, если он есть
-      if (config.JWT) {
-        headers["Authorization"] = `Bearer ${config.JWT}`;
+      if (window.JWT) {
+        headers["Authorization"] = `Bearer ${window.JWT}`;
       }
 
       const response = await axios.post(config.apiURL, codeData, { headers });
 
-      // Вызываем callback успешной отправки
-      config.apiSuccess?.({
-        result: "OK",
-        errorText: "",
-        data: response.data,
-        JWT: config.JWT,
-      });
+      // Обновляем JWT из ответа сервера
+      if (response.data?.JWT) {
+        window.JWT = response.data.JWT;
+      }
+
+      // Логируем успешную отправку
+      handleLog("api-success", response.data);
+
+      // Вызываем callback успешной отправки с полным объектом ответа
+      config.apiSuccess?.(response.data);
     } catch (error) {
+      // Логируем ошибку отправки
+      handleLog("api-error", error.message);
+
       // Вызываем callback ошибки отправки
-      config.apiError?.({
-        result: "ERROR",
-        errorText: error.message,
-        data: {},
-        JWT: config.JWT,
-      });
+      config.apiError?.(error);
     }
-  }, []);
+  }, [handleLog]);
 
   const handleEvent = useCallback((eventType, payload) => {
     // Вызываем внешние функции из window.dataMatrixConfig
@@ -69,18 +82,6 @@ function App() {
       }
     }
   }, [sendToApi]);
-
-  const handleLog = useCallback((type, data) => {
-    const message =
-      typeof data === "object"
-        ? `${type}: ${JSON.stringify(data, null, 2)}`
-        : `${type}: ${data}`;
-
-    setLogs((prev) => [
-      ...prev.slice(-19),
-      { type: "log", message, time: new Date().toLocaleTimeString() },
-    ]);
-  }, []);
 
   return (
     <div className="app">
