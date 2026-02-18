@@ -12,6 +12,7 @@
   },
   "dependencies": {
     "@utrace/u-scanner": "^0.4.2",
+    "axios": "^1.13.5",
     "react": "^19.2.0",
     "react-dom": "^19.2.0"
   },
