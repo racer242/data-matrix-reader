@@ -31,8 +31,8 @@ function App() {
         };
 
         // Добавляем JWT токен в заголовок, если он есть
-        if (app.JWT) {
-          headers["Authorization"] = `Bearer ${app.JWT}`;
+        if (window.JWT) {
+          headers["Authorization"] = `Bearer ${window.JWT}`;
         }
 
         const response = await axios.post(app.config.apiURL, codeData, {
@@ -41,7 +41,7 @@ function App() {
 
         // Обновляем JWT из ответа сервера
         if (response.data?.JWT) {
-          app.JWT = response.data.JWT;
+          window.JWT = response.data.JWT;
         }
 
         // Логируем успешную отправку

@@ -99,5 +99,10 @@ window.dataMatrixApp = {
   },
 };
 
-// Алиасы для обратной совместимости
+/**
+ * Глобальный JWT токен для авторизации запросов
+ */
+window.JWT = "";
+
+// Алиас для обратной совместимости
 window.dataMatrixConfig = window.dataMatrixApp.config;

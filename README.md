@@ -26,7 +26,6 @@ window.dataMatrixApp = {
     showConsole: false,      // Показывать отладочную консоль
     apiURL: '/response.json' // URL API для отправки данных
   },
-  JWT: '',  // JWT токен для авторизации
   on: {     // Обработчики событий
     dataMatrixSuccess: function(codeData) { ... },
     dataMatrixError: function(error) { ... },
@@ -36,6 +35,9 @@ window.dataMatrixApp = {
   deactivate: function() { ... },  // Остановить приложение
   restart: function() { ... }      // Перезапустить приложение
 };
+
+// Глобальный JWT токен (отдельно от dataMatrixApp)
+window.JWT = '';
 
 // Алиас для обратной совместимости
 window.dataMatrixConfig = window.dataMatrixApp.config;
@@ -53,8 +55,9 @@ window.dataMatrixConfig = window.dataMatrixApp.config;
 
 | Переменная                    | Тип    | Описание                                     |
 | ----------------------------- | ------ | -------------------------------------------- |
-| `window.dataMatrixApp.JWT`    | string | JWT токен для авторизации запросов к серверу |
+| `window.JWT`                  | string | JWT токен для авторизации запросов к серверу |
 | `window.dataMatrixApp.config` | object | Конфигурация приложения                      |
+| `window.dataMatrixApp.on`     | object | Обработчики событий                          |
 
 ## События и обработчики
 
@@ -210,7 +213,7 @@ npm run build
 
 ```javascript
 // До инициализации сканера
-window.dataMatrixApp.JWT = "your-jwt-token-here";
+window.JWT = "your-jwt-token-here";
 ```
 
 ### Изменение API URL
@@ -277,7 +280,7 @@ window.dataMatrixApp.restart();
 <script>
   function openScanner() {
     // Настройка перед запуском
-    window.dataMatrixApp.JWT = "your-jwt-token";
+    window.JWT = "your-jwt-token";
     window.dataMatrixApp.config.apiURL = "https://your-api.com/scan";
 
     // Показать поп-ап и активировать приложение
@@ -296,8 +299,8 @@ window.dataMatrixApp.restart();
 ### Настройка перед активацией
 
 ```javascript
-// Установить JWT токен
-window.dataMatrixApp.JWT = "your-jwt-token";
+// Установить JWT токен (глобальная переменная)
+window.JWT = "your-jwt-token";
 
 // Настроить API URL
 window.dataMatrixApp.config.apiURL = "https://your-api.com/scan";
