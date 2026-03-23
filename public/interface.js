@@ -1,3 +1,11 @@
+/**
+ * Возвращает корневой элемент для рендеринга приложения
+ * @returns {HTMLElement|null} Элемент с id="root"
+ */
+window.getAppRoot = function () {
+  return document.getElementById("root");
+};
+
 window.dataMatrixConfig = {
   /**
    * Таймаут повторной обработки одинаковых событий (мс)

@@ -1,15 +1,59 @@
 <!doctype html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <link rel="icon" type="image/svg+xml" href="./vite.svg" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>datamatrix-scanner</title>
-    <script type="module" crossorigin src="./assets/index-hh2MZHLK.js"></script>
-    <link rel="stylesheet" crossorigin href="./assets/index-DBO5g44Z.css">
-  </head>
-  <body>
-    <div id="root"></div>
-    <script src="./interface.js"></script>
-  </body>
+
+<head>
+  <meta charset="UTF-8" />
+  <link rel="icon" type="image/svg+xml" href="./vite.svg" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>datamatrix-scanner</title>
+  <style>
+    /* Глобальные стили для изоляции приложения */
+    #root {
+      all: initial;
+      display: block;
+    }
+
+    #root * {
+      box-sizing: border-box;
+    }
+
+    #root {
+      width: 100%;
+      height: 100%;
+      margin: 0;
+      padding: 0;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+      background: #000;
+      overflow: hidden;
+    }
+
+    #root .app {
+      width: 100%;
+      height: 100%;
+    }
+
+    /* Сброс стилей для вложенных элементов */
+    #root div,
+    #root span,
+    #root video,
+    #root button {
+      margin: 0;
+      padding: 0;
+      border: none;
+      outline: none;
+    }
+
+    #root video {
+      display: block;
+    }
+  </style>
+  <script type="module" crossorigin src="./assets/index-CXfCoI0g.js"></script>
+  <link rel="stylesheet" crossorigin href="./assets/index-D5odaqUt.css">
+</head>
+
+<body>
+  <div id="root"></div>
+  <script src="./interface.js"></script>
+</body>
+
 </html>
