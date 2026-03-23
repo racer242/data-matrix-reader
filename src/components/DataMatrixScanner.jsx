@@ -35,7 +35,8 @@ function DataMatrixScanner({ onEvent, onLog }) {
         scanner.on("scan-success", ({ codeData }) => {
           const key = "success:" + JSON.stringify(codeData);
           const now = Date.now();
-          const timeout = window.dataMatrixConfig?.duplicateTimeout || 3000;
+          const timeout =
+            window.dataMatrixApp?.config?.duplicateTimeout || 3000;
 
           // Пропускаем дубликат в пределах таймаута
           if (
@@ -62,7 +63,8 @@ function DataMatrixScanner({ onEvent, onLog }) {
 
           const key = "error:" + (error.message || error.toString());
           const now = Date.now();
-          const timeout = window.dataMatrixConfig?.duplicateTimeout || 3000;
+          const timeout =
+            window.dataMatrixApp?.config?.duplicateTimeout || 3000;
 
           // Пропускаем дубликат в пределах таймаута
           if (

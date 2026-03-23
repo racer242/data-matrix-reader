@@ -32,11 +32,6 @@ window.dataMatrixApp = {
   },
 
   /**
-   * Глобальный JWT токен для авторизации запросов
-   */
-  JWT: "",
-
-  /**
    * Возвращает корневой элемент для рендеринга приложения
    * @returns {HTMLElement|null} Элемент с id="root"
    */
@@ -103,6 +98,3 @@ window.dataMatrixApp = {
  * Глобальный JWT токен для авторизации запросов
  */
 window.JWT = "";
-
-// Алиас для обратной совместимости
-window.dataMatrixConfig = window.dataMatrixApp.config;

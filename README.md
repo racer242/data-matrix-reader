@@ -38,9 +38,6 @@ window.dataMatrixApp = {
 
 // Глобальный JWT токен (отдельно от dataMatrixApp)
 window.JWT = '';
-
-// Алиас для обратной совместимости
-window.dataMatrixConfig = window.dataMatrixApp.config;
 ```
 
 ### Параметры конфигурации
@@ -53,11 +50,11 @@ window.dataMatrixConfig = window.dataMatrixApp.config;
 
 ### Глобальные переменные
 
-| Переменная                    | Тип    | Описание                                     |
-| ----------------------------- | ------ | -------------------------------------------- |
-| `window.JWT`                  | string | JWT токен для авторизации запросов к серверу |
-| `window.dataMatrixApp.config` | object | Конфигурация приложения                      |
-| `window.dataMatrixApp.on`     | object | Обработчики событий                          |
+| Переменная                    | Тип    | Описание                           |
+| ----------------------------- | ------ | ---------------------------------- |
+| `window.JWT`                  | string | JWT токен для авторизации запросов |
+| `window.dataMatrixApp.config` | object | Конфигурация приложения            |
+| `window.dataMatrixApp.on`     | object | Обработчики событий                |
 
 ## События и обработчики
 
