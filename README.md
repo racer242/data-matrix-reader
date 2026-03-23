@@ -19,19 +19,26 @@
 ### Конфигурация (public/interface.js)
 
 ```javascript
-window.dataMatrixConfig = {
-  // Таймаут повторной обработки одинаковых событий (мс)
-  duplicateTimeout: 3000,
-
-  // Показывать консоль поверх экрана
-  showConsole: false,
-
-  // URL API для отправки данных
-  apiURL: "/response.json",
+// Конфигурация и управление через window.dataMatrixApp
+window.dataMatrixApp = {
+  config: {
+    duplicateTimeout: 3000,  // Таймаут повторной обработки событий (мс)
+    showConsole: false,      // Показывать отладочную консоль
+    apiURL: '/response.json' // URL API для отправки данных
+  },
+  JWT: '',  // JWT токен для авторизации
+  on: {     // Обработчики событий
+    dataMatrixSuccess: function(codeData) { ... },
+    dataMatrixError: function(error) { ... },
+    // ... другие обработчики
+  },
+  activate: function() { ... },    // Запустить приложение
+  deactivate: function() { ... },  // Остановить приложение
+  restart: function() { ... }      // Перезапустить приложение
 };
 
-// Глобальный JWT токен
-window.JWT = "";
+// Алиас для обратной совместимости
+window.dataMatrixConfig = window.dataMatrixApp.config;
 ```
 
 ### Параметры конфигурации
@@ -44,9 +51,10 @@ window.JWT = "";
 
 ### Глобальные переменные
 
-| Переменная   | Тип    | Описание                                     |
-| ------------ | ------ | -------------------------------------------- |
-| `window.JWT` | string | JWT токен для авторизации запросов к серверу |
+| Переменная                    | Тип    | Описание                                     |
+| ----------------------------- | ------ | -------------------------------------------- |
+| `window.dataMatrixApp.JWT`    | string | JWT токен для авторизации запросов к серверу |
+| `window.dataMatrixApp.config` | object | Конфигурация приложения                      |
 
 ## События и обработчики
 
@@ -202,32 +210,46 @@ npm run build
 
 ```javascript
 // До инициализации сканера
-window.JWT = "your-jwt-token-here";
+window.dataMatrixApp.JWT = "your-jwt-token-here";
 ```
 
 ### Изменение API URL
 
 ```javascript
-window.dataMatrixConfig.apiURL = "https://your-api.com/scan";
+window.dataMatrixApp.config.apiURL = "https://your-api.com/scan";
 ```
 
 ### Отключение консоли
 
 ```javascript
-window.dataMatrixConfig.showConsole = false;
+window.dataMatrixApp.config.showConsole = false;
+```
+
+### Переопределение обработчиков событий
+
+```javascript
+// Переопределить обработчик dataMatrixSuccess
+window.dataMatrixApp.on.dataMatrixSuccess = function (codeData) {
+  console.log("Пользовательский обработчик:", codeData);
+};
+
+// Переопределить обработчик apiSuccess
+window.dataMatrixApp.on.apiSuccess = function (response) {
+  console.log("Ответ сервера:", response);
+};
 ```
 
 ## Интеграция в другие проекты
 
 Приложение подготовлено для интеграции в существующие страницы без конфликтов стилей и скриптов.
 
-### Изоляция стилей
+### Принцип работы
 
-Все глобальные стили вынесены в `index.html` и применяют селектор `#root`, что обеспечивает полную изоляцию от внешних стилей страницы.
+1. **При загрузке страницы** — приложение НЕ запускается автоматически, только инициализирует объект `window.dataMatrixApp`
+2. **При вызове `activate()`** — приложение рендерится в элементе `#root`
+3. **При вызове `deactivate()`** — приложение очищает контейнер и освобождает ресурсы
 
 ### Управление жизненным циклом
-
-Приложение поддерживает активацию и деактивацию через глобальный объект `window.dataMatrixApp`:
 
 ```javascript
 // Активировать приложение (рендеринг)
@@ -254,28 +276,34 @@ window.dataMatrixApp.restart();
 
 <script>
   function openScanner() {
+    // Настройка перед запуском
+    window.dataMatrixApp.JWT = "your-jwt-token";
+    window.dataMatrixApp.config.apiURL = "https://your-api.com/scan";
+
+    // Показать поп-ап и активировать приложение
     document.getElementById("scanner-popup").style.display = "block";
     window.dataMatrixApp.activate();
   }
 
   function closeScanner() {
+    // Деактивировать приложение и скрыть поп-ап
     window.dataMatrixApp.deactivate();
     document.getElementById("scanner-popup").style.display = "none";
   }
 </script>
 ```
 
-### Настройка перед инициализацией
+### Настройка перед активацией
 
 ```javascript
 // Установить JWT токен
-window.JWT = "your-jwt-token";
+window.dataMatrixApp.JWT = "your-jwt-token";
 
 // Настроить API URL
-window.dataMatrixConfig.apiURL = "https://your-api.com/scan";
+window.dataMatrixApp.config.apiURL = "https://your-api.com/scan";
 
 // Включить консоль для отладки
-window.dataMatrixConfig.showConsole = true;
+window.dataMatrixApp.config.showConsole = true;
 
 // После настройки вызвать активацию
 window.dataMatrixApp.activate();
@@ -283,10 +311,10 @@ window.dataMatrixApp.activate();
 
 ### Получение корневого элемента
 
-Функция `window.getAppRoot()` возвращает корневой элемент приложения:
+Функция `window.dataMatrixApp.getAppRoot()` возвращает корневой элемент приложения:
 
 ```javascript
-const rootElement = window.getAppRoot();
+const rootElement = window.dataMatrixApp.getAppRoot();
 // Возвращает document.getElementById('root')
 ```
 
@@ -304,6 +332,23 @@ window.dataMatrixApp.activate();
 // Удаление из DOM
 window.dataMatrixApp.deactivate();
 document.body.removeChild(container);
+```
+
+### Отключение автозапуска (для отладки)
+
+В `index.html` добавлен скрипт автозапуска для отладки. Для интеграции в другие проекты удалите этот скрипт:
+
+```html
+<!-- Удалить этот блок -->
+<script>
+  window.addEventListener("DOMContentLoaded", () => {
+    setTimeout(() => {
+      if (window.dataMatrixApp?.activate) {
+        window.dataMatrixApp.activate();
+      }
+    }, 100);
+  });
+</script>
 ```
 
 ## Технологии
