@@ -22,30 +22,30 @@
 window.dataMatrixConfig = {
   // Таймаут повторной обработки одинаковых событий (мс)
   duplicateTimeout: 3000,
-  
+
   // Показывать консоль поверх экрана
   showConsole: false,
-  
+
   // URL API для отправки данных
-  apiURL: '/response.json',
+  apiURL: "/response.json",
 };
 
 // Глобальный JWT токен
-window.JWT = '';
+window.JWT = "";
 ```
 
 ### Параметры конфигурации
 
-| Параметр | Тип | По умолчанию | Описание |
-|----------|-----|--------------|----------|
-| `duplicateTimeout` | number | 3000 | Таймаут повторной обработки одинаковых событий (мс) |
-| `showConsole` | boolean | false | Показывать отладочную консоль поверх экрана |
-| `apiURL` | string | '/response.json' | URL сервера для отправки данных сканирования |
+| Параметр           | Тип     | По умолчанию     | Описание                                            |
+| ------------------ | ------- | ---------------- | --------------------------------------------------- |
+| `duplicateTimeout` | number  | 3000             | Таймаут повторной обработки одинаковых событий (мс) |
+| `showConsole`      | boolean | false            | Показывать отладочную консоль поверх экрана         |
+| `apiURL`           | string  | '/response.json' | URL сервера для отправки данных сканирования        |
 
 ### Глобальные переменные
 
-| Переменная | Тип | Описание |
-|------------|-----|----------|
+| Переменная   | Тип    | Описание                                     |
+| ------------ | ------ | -------------------------------------------- |
 | `window.JWT` | string | JWT токен для авторизации запросов к серверу |
 
 ## События и обработчики
@@ -53,29 +53,37 @@ window.JWT = '';
 ### События камеры
 
 #### camAccessSuccess(cameraData)
+
 Вызывается при успешном доступе к камере.
 
 **Параметры:**
+
 - `cameraData` — данные камеры (объект CameraData из UScanner)
 
 #### camAccessError(error)
+
 Вызывается при ошибке доступа к камере.
 
 **Параметры:**
+
 - `error` — объект ошибки
 
 #### camStarting()
+
 Вызывается при начале запуска камеры.
 
 #### camStopped()
+
 Вызывается при остановке камеры.
 
 ### События сканирования
 
 #### dataMatrixSuccess(codeData)
+
 Вызывается при успешном считывании DataMatrix кода.
 
 **Параметры:**
+
 - `codeData` — данные кода:
   ```javascript
   {
@@ -89,23 +97,29 @@ window.JWT = '';
   ```
 
 #### dataMatrixError(error)
+
 Вызывается при ошибке считывания кода.
 
 **Параметры:**
+
 - `error` — объект ошибки
 
 ### События API
 
 #### apiSuccess(response)
+
 Вызывается при успешной отправке данных на сервер.
 
 **Параметры:**
+
 - `response` — ответ сервера (см. формат ниже)
 
 #### apiError(error)
+
 Вызывается при ошибке отправки данных.
 
 **Параметры:**
+
 - `error` — объект ошибки Axios
 
 ## Формат данных
@@ -124,6 +138,7 @@ window.JWT = '';
 ```
 
 **Заголовки:**
+
 ```
 Content-Type: application/json
 Authorization: Bearer <JWT>
@@ -140,12 +155,12 @@ Authorization: Bearer <JWT>
 }
 ```
 
-| Поле | Тип | Описание |
-|------|-----|----------|
-| `result` | string | Статус выполнения: `"OK"` или `"ERROR"` |
-| `errorText` | string | Текст ошибки (пустой при успехе) |
-| `data` | object | Дополнительные данные ответа |
-| `JWT` | string | Новый JWT токен (опционально) |
+| Поле        | Тип    | Описание                                |
+| ----------- | ------ | --------------------------------------- |
+| `result`    | string | Статус выполнения: `"OK"` или `"ERROR"` |
+| `errorText` | string | Текст ошибки (пустой при успехе)        |
+| `data`      | object | Дополнительные данные ответа            |
+| `JWT`       | string | Новый JWT токен (опционально)           |
 
 ### Пример response.json
 
@@ -187,19 +202,108 @@ npm run build
 
 ```javascript
 // До инициализации сканера
-window.JWT = 'your-jwt-token-here';
+window.JWT = "your-jwt-token-here";
 ```
 
 ### Изменение API URL
 
 ```javascript
-window.dataMatrixConfig.apiURL = 'https://your-api.com/scan';
+window.dataMatrixConfig.apiURL = "https://your-api.com/scan";
 ```
 
 ### Отключение консоли
 
 ```javascript
 window.dataMatrixConfig.showConsole = false;
+```
+
+## Интеграция в другие проекты
+
+Приложение подготовлено для интеграции в существующие страницы без конфликтов стилей и скриптов.
+
+### Изоляция стилей
+
+Все глобальные стили вынесены в `index.html` и применяют селектор `#root`, что обеспечивает полную изоляцию от внешних стилей страницы.
+
+### Управление жизненным циклом
+
+Приложение поддерживает активацию и деактивацию через глобальный объект `window.dataMatrixApp`:
+
+```javascript
+// Активировать приложение (рендеринг)
+window.dataMatrixApp.activate();
+
+// Деактивировать приложение (очистка контейнера)
+window.dataMatrixApp.deactivate();
+
+// Перезапустить приложение
+window.dataMatrixApp.restart();
+```
+
+### Пример интеграции в поп-ап
+
+```html
+<!-- Кнопка открытия сканера -->
+<button onclick="openScanner()">Открыть сканер</button>
+
+<!-- Контейнер для сканера (скрыт по умолчанию) -->
+<div id="scanner-popup" style="display: none;">
+  <div id="root"></div>
+  <button onclick="closeScanner()">Закрыть</button>
+</div>
+
+<script>
+  function openScanner() {
+    document.getElementById("scanner-popup").style.display = "block";
+    window.dataMatrixApp.activate();
+  }
+
+  function closeScanner() {
+    window.dataMatrixApp.deactivate();
+    document.getElementById("scanner-popup").style.display = "none";
+  }
+</script>
+```
+
+### Настройка перед инициализацией
+
+```javascript
+// Установить JWT токен
+window.JWT = "your-jwt-token";
+
+// Настроить API URL
+window.dataMatrixConfig.apiURL = "https://your-api.com/scan";
+
+// Включить консоль для отладки
+window.dataMatrixConfig.showConsole = true;
+
+// После настройки вызвать активацию
+window.dataMatrixApp.activate();
+```
+
+### Получение корневого элемента
+
+Функция `window.getAppRoot()` возвращает корневой элемент приложения:
+
+```javascript
+const rootElement = window.getAppRoot();
+// Возвращает document.getElementById('root')
+```
+
+### Динамическое добавление/удаление из DOM
+
+Приложение автоматически определяет наличие элемента `#root` в DOM. При удалении элемента из DOM вызовите `deactivate()`, при добавлении — `activate()`.
+
+```javascript
+// Добавление в DOM
+const container = document.createElement("div");
+container.id = "root";
+document.body.appendChild(container);
+window.dataMatrixApp.activate();
+
+// Удаление из DOM
+window.dataMatrixApp.deactivate();
+document.body.removeChild(container);
 ```
 
 ## Технологии
