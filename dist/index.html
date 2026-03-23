@@ -47,13 +47,27 @@
       display: block;
     }
   </style>
-  <script type="module" crossorigin src="./assets/index-CXfCoI0g.js"></script>
+  <script type="module" crossorigin src="./assets/index-BlIYLBPl.js"></script>
   <link rel="stylesheet" crossorigin href="./assets/index-D5odaqUt.css">
 </head>
 
 <body>
   <div id="root"></div>
   <script src="./interface.js"></script>
+  <!-- Скрипт для отладки: автозапуск приложения после загрузки -->
+  <!-- Для интеграции в другие проекты этот скрипт можно удалить -->
+  <script>
+    // Автозапуск для отладки
+    window.addEventListener('DOMContentLoaded', () => {
+      console.log('DataMatrix Scanner: DOMContentLoaded, вызываем activate()');
+      // Небольшая задержка для уверенности, что main.jsx загрузился
+      setTimeout(() => {
+        if (window.dataMatrixApp?.activate) {
+          window.dataMatrixApp.activate();
+        }
+      }, 100);
+    });
+  </script>
 </body>
 
 </html>

@@ -3,13 +3,22 @@ import { createRoot } from "react-dom/client";
 import "./index.css";
 import App from "./App.jsx";
 
-// Инициализация приложения
+// Внутренняя переменная для хранения экземпляра root
+let appRoot = null;
+
+/**
+ * Инициализация приложения
+ * @returns {object|null} Экземпляр root или null при ошибке
+ */
 const initApp = () => {
-  const rootElement = window.getAppRoot?.();
+  const rootElement = window.dataMatrixApp?.getAppRoot?.();
   if (!rootElement) {
     console.error("DataMatrix Scanner: корневой элемент #root не найден в DOM");
     return null;
   }
+
+  // Очищаем контейнер перед рендерингом
+  rootElement.innerHTML = "";
 
   const root = createRoot(rootElement);
   root.render(
@@ -18,48 +27,37 @@ const initApp = () => {
     </StrictMode>,
   );
 
+  appRoot = root;
   return root;
 };
 
-// Храним экземпляр root
-let appRoot = null;
-
-// Попытка инициализации при загрузке
-if (document.readyState === "loading") {
-  document.addEventListener("DOMContentLoaded", () => {
-    appRoot = initApp();
-  });
-} else {
-  appRoot = initApp();
-}
-
-// Экспорт для внешнего управления
-window.dataMatrixApp = {
-  /**
-   * Активировать приложение (рендеринг)
-   */
-  activate: () => {
-    if (!appRoot) {
-      appRoot = initApp();
-    }
-  },
-
-  /**
-   * Деактивировать приложение (очистка контейнера)
-   */
-  deactivate: () => {
-    const rootElement = window.getAppRoot?.();
-    if (rootElement) {
-      rootElement.innerHTML = "";
-    }
-    appRoot = null;
-  },
-
-  /**
-   * Перезапустить приложение
-   */
-  restart: () => {
-    window.dataMatrixApp.deactivate();
-    setTimeout(window.dataMatrixApp.activate, 0);
-  },
+/**
+ * Активировать приложение (рендеринг)
+ */
+window.dataMatrixApp.activate = () => {
+  if (!appRoot) {
+    initApp();
+  }
 };
+
+/**
+ * Деактивировать приложение (очистка контейнера)
+ */
+window.dataMatrixApp.deactivate = () => {
+  const rootElement = window.dataMatrixApp?.getAppRoot?.();
+  if (rootElement) {
+    rootElement.innerHTML = "";
+  }
+  appRoot = null;
+};
+
+/**
+ * Перезапустить приложение
+ */
+window.dataMatrixApp.restart = () => {
+  window.dataMatrixApp.deactivate();
+  setTimeout(window.dataMatrixApp.activate, 0);
+};
+
+// Экспорт для внешнего использования (опционально)
+export { initApp };

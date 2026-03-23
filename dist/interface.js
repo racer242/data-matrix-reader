@@ -1,94 +1,103 @@
 /**
- * Возвращает корневой элемент для рендеринга приложения
- * @returns {HTMLElement|null} Элемент с id="root"
+ * Глобальный объект приложения DataMatrix Scanner
+ * Предоставляет API для управления жизненным циклом и конфигурацией
  */
-window.getAppRoot = function () {
-  return document.getElementById("root");
+window.dataMatrixApp = {
+  /**
+   * Корневой элемент приложения
+   */
+  root: null,
+
+  /**
+   * Конфигурация приложения
+   */
+  config: {
+    /**
+     * Таймаут повторной обработки одинаковых событий (мс)
+     * По умолчанию 3000 мс (3 секунды)
+     */
+    duplicateTimeout: 3000,
+
+    /**
+     * Показывать консоль поверх экрана
+     * По умолчанию false
+     */
+    showConsole: false,
+
+    /**
+     * URL API для отправки данных сканирования
+     * JSON-заглушка: /response.json
+     */
+    apiURL: "/response.json",
+  },
+
+  /**
+   * Глобальный JWT токен для авторизации запросов
+   */
+  JWT: "",
+
+  /**
+   * Возвращает корневой элемент для рендеринга приложения
+   * @returns {HTMLElement|null} Элемент с id="root"
+   */
+  getAppRoot: function () {
+    return document.getElementById("root");
+  },
+
+  /**
+   * Активировать приложение (рендеринг)
+   */
+  activate: function () {
+    console.log("DataMatrix Scanner: activate() called");
+    // Функция будет определена в main.jsx после загрузки модуля
+  },
+
+  /**
+   * Деактивировать приложение (очистка контейнера)
+   */
+  deactivate: function () {
+    console.log("DataMatrix Scanner: deactivate() called");
+    // Функция будет определена в main.jsx после загрузки модуля
+  },
+
+  /**
+   * Перезапустить приложение
+   */
+  restart: function () {
+    console.log("DataMatrix Scanner: restart() called");
+    // Функция будет определена в main.jsx после загрузки модуля
+  },
+
+  /**
+   * Обработчики событий (заглушки, будут заменены в main.jsx)
+   */
+  on: {
+    camAccessError: function (error) {
+      console.log("camAccessError:", error);
+    },
+    camAccessSuccess: function (cameraData) {
+      console.log("camAccessSuccess:", cameraData);
+    },
+    camStarting: function () {
+      console.log("camStarting");
+    },
+    camStopped: function () {
+      console.log("camStopped");
+    },
+    dataMatrixSuccess: function (codeData) {
+      console.log("dataMatrixSuccess:", codeData);
+    },
+    dataMatrixError: function (error) {
+      console.log("dataMatrixError:", error);
+    },
+    apiSuccess: function (response) {
+      console.log("apiSuccess:", response);
+    },
+    apiError: function (error) {
+      console.log("apiError:", error);
+    },
+  },
 };
 
-window.dataMatrixConfig = {
-  /**
-   * Таймаут повторной обработки одинаковых событий (мс)
-   * По умолчанию 3000 мс (3 секунды)
-   */
-  duplicateTimeout: 3000,
-
-  /**
-   * Показывать консоль поверх экрана
-   * По умолчанию false
-   */
-  showConsole: true,
-
-  /**
-   * URL API для отправки данных сканирования
-   * JSON-заглушка: /response.json
-   */
-  apiURL: "/response.json",
-
-  /**
-   * Вызывается при ошибке доступа к камере (техническая ошибка)
-   * @param {Error} error - объект ошибки
-   */
-  camAccessError: function (error) {
-    console.log("camAccessError:", error);
-  },
-
-  /**
-   * Вызывается при успешном доступе к камере
-   * @param {Object} cameraData - данные камеры
-   */
-  camAccessSuccess: function (cameraData) {
-    console.log("camAccessSuccess:", cameraData);
-  },
-
-  /**
-   * Вызывается при начале запуска камеры
-   */
-  camStarting: function () {
-    console.log("camStarting");
-  },
-
-  /**
-   * Вызывается при остановке камеры
-   */
-  camStopped: function () {
-    console.log("camStopped");
-  },
-
-  /**
-   * Вызывается при успешном считывании DataMatrix кода
-   * @param {Object} codeData - данные кода из UScanner
-   */
-  dataMatrixSuccess: function (codeData) {
-    console.log("dataMatrixSuccess:", codeData);
-  },
-
-  /**
-   * Вызывается при ошибке считывания кода
-   * @param {Error} error - объект ошибки
-   */
-  dataMatrixError: function (error) {
-    console.log("dataMatrixError:", error);
-  },
-
-  /**
-   * Вызывается при успешной отправке данных на сервер
-   * @param {Object} response - ответ сервера { result, errorText, data, JWT }
-   */
-  apiSuccess: function (response) {
-    console.log("apiSuccess:", response);
-  },
-
-  /**
-   * Вызывается при ошибке отправки данных на сервер
-   * @param {Error} error - объект ошибки
-   */
-  apiError: function (error) {
-    console.log("apiError:", error);
-  },
-};
-
-/**
- * Глобальный JWT токен для авторизации запросов
- */
-window.JWT = "";
+// Алиасы для обратной совместимости
+window.dataMatrixConfig = window.dataMatrixApp.config;

@@ -18,75 +18,84 @@ function App() {
     ]);
   }, []);
 
-  const sendToApi = useCallback(async (codeData) => {
-    const config = window.dataMatrixConfig;
-    if (!config?.apiURL) {
-      return;
-    }
-
-    try {
-      const headers = {
-        "Content-Type": "application/json",
-      };
-
-      // Добавляем JWT токен в заголовок, если он есть
-      if (window.JWT) {
-        headers["Authorization"] = `Bearer ${window.JWT}`;
+  const sendToApi = useCallback(
+    async (codeData) => {
+      const app = window.dataMatrixApp;
+      if (!app?.config?.apiURL) {
+        return;
       }
 
-      const response = await axios.post(config.apiURL, codeData, { headers });
+      try {
+        const headers = {
+          "Content-Type": "application/json",
+        };
 
-      // Обновляем JWT из ответа сервера
-      if (response.data?.JWT) {
-        window.JWT = response.data.JWT;
+        // Добавляем JWT токен в заголовок, если он есть
+        if (app.JWT) {
+          headers["Authorization"] = `Bearer ${app.JWT}`;
+        }
+
+        const response = await axios.post(app.config.apiURL, codeData, {
+          headers,
+        });
+
+        // Обновляем JWT из ответа сервера
+        if (response.data?.JWT) {
+          app.JWT = response.data.JWT;
+        }
+
+        // Логируем успешную отправку
+        handleLog("api-success", response.data);
+
+        // Вызываем callback успешной отправки с полным объектом ответа
+        app.on.apiSuccess?.(response.data);
+      } catch (error) {
+        // Логируем ошибку отправки
+        handleLog("api-error", error.message);
+
+        // Вызываем callback ошибки отправки
+        app.on.apiError?.(error);
       }
+    },
+    [handleLog],
+  );
 
-      // Логируем успешную отправку
-      handleLog("api-success", response.data);
-
-      // Вызываем callback успешной отправки с полным объектом ответа
-      config.apiSuccess?.(response.data);
-    } catch (error) {
-      // Логируем ошибку отправки
-      handleLog("api-error", error.message);
-
-      // Вызываем callback ошибки отправки
-      config.apiError?.(error);
-    }
-  }, [handleLog]);
-
-  const handleEvent = useCallback((eventType, payload) => {
-    // Вызываем внешние функции из window.dataMatrixConfig
-    if (window.dataMatrixConfig) {
-      switch (eventType) {
-        case "dataMatrixSuccess":
-          window.dataMatrixConfig.dataMatrixSuccess?.(payload);
-          // Отправляем данные на сервер
-          sendToApi(payload);
-          break;
-        case "dataMatrixError":
-          window.dataMatrixConfig.dataMatrixError?.(payload);
-          break;
-        case "camAccessError":
-          window.dataMatrixConfig.camAccessError?.(payload);
-          break;
-        case "camAccessSuccess":
-          window.dataMatrixConfig.camAccessSuccess?.(payload);
-          break;
-        case "camStarting":
-          window.dataMatrixConfig.camStarting?.();
-          break;
-        case "camStopped":
-          window.dataMatrixConfig.camStopped?.();
-          break;
+  const handleEvent = useCallback(
+    (eventType, payload) => {
+      // Вызываем внешние функции из window.dataMatrixApp.on
+      const app = window.dataMatrixApp;
+      if (app?.on) {
+        switch (eventType) {
+          case "dataMatrixSuccess":
+            app.on.dataMatrixSuccess?.(payload);
+            // Отправляем данные на сервер
+            sendToApi(payload);
+            break;
+          case "dataMatrixError":
+            app.on.dataMatrixError?.(payload);
+            break;
+          case "camAccessError":
+            app.on.camAccessError?.(payload);
+            break;
+          case "camAccessSuccess":
+            app.on.camAccessSuccess?.(payload);
+            break;
+          case "camStarting":
+            app.on.camStarting?.();
+            break;
+          case "camStopped":
+            app.on.camStopped?.();
+            break;
+        }
       }
-    }
-  }, [sendToApi]);
+    },
+    [sendToApi],
+  );
 
   return (
     <div className="app">
       <DataMatrixScanner onEvent={handleEvent} onLog={handleLog} />
-      {window.dataMatrixConfig?.showConsole && (
+      {window.dataMatrixApp?.config?.showConsole && (
         <div className="console-overlay">
           {logs.map((log, index) => (
             <div key={index} className={`console-line console-${log.type}`}>
