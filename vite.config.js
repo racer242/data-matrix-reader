@@ -16,6 +16,6 @@ export default defineConfig({
   plugins: [react(), basicSsl()],
   server: {
     host: true, // Разрешить доступ с внешних устройств по IP
-    port: 5175,
+    port: 3010,
   },
 });
