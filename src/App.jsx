@@ -43,7 +43,11 @@ function App() {
 
         // Обновляем JWT из ответа сервера
         if (response.data?.JWT) {
-          window.JWT = response.data.JWT;
+          if (window.setJWT) {
+            window.setJWT(response.data.JWT);
+          } else {
+            window.JWT = response.data.JWT;
+          }
         }
 
         // Логируем успешную отправку
