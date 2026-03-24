@@ -22,13 +22,19 @@ window.dataMatrixApp = {
      * Показывать консоль поверх экрана
      * По умолчанию false
      */
-    showConsole: false,
+    showConsole: true,
 
     /**
      * URL API для отправки данных сканирования
      * JSON-заглушка: /response.json
      */
     apiURL: "/response.json",
+
+    /**
+     * Остановить сканер после первого успешного сканирования
+     * По умолчанию true
+     */
+    catchOnce: true,
   },
 
   /**

@@ -49,6 +49,11 @@ function DataMatrixScanner({ onEvent, onLog }) {
 
           onEventRef.current?.("dataMatrixSuccess", codeData);
           onLogRef.current?.("scan-success", codeData);
+
+          // Остановить сканер после первого успешного сканирования
+          if (window.dataMatrixApp?.config?.catchOnce !== false) {
+            scanner.stop();
+          }
         });
 
         // Ошибка в процессе сканирования (не останавливает сканирование)

@@ -44,6 +44,7 @@ window.dataMatrixApp.activate = () => {
  * Деактивировать приложение (очистка контейнера)
  */
 window.dataMatrixApp.deactivate = () => {
+  appRoot.unmount();
   const rootElement = window.dataMatrixApp?.getAppRoot?.();
   if (rootElement) {
     rootElement.innerHTML = "";
