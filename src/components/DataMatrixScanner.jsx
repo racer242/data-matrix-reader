@@ -5,6 +5,7 @@ function DataMatrixScanner({ onEvent, onLog }) {
   const videoRef = useRef(null);
   const uscannerRef = useRef(null);
   const [isReady, setIsReady] = useState(false);
+  const [isUIHidden, setIsUIHidden] = useState(false);
   const [isScanning, setIsScanning] = useState(false);
   const onEventRef = useRef(onEvent);
   const onLogRef = useRef(onLog);
@@ -146,10 +147,40 @@ function DataMatrixScanner({ onEvent, onLog }) {
     };
   }, []);
 
+  useEffect(() => {
+    const applyStyle = () => {
+      // Ищем элемент по тегу
+      const host = document.querySelector("scanner-ui");
+
+      if (host && host.shadowRoot) {
+        const style = document.createElement("style");
+        style.textContent = `
+        /* :host выбирает сам корень scanner-ui внутри shadow dom */
+        .u-scanner-ui__watermark, .u-scanner-ui__control-panel { 
+          display: none !important;
+        }
+      `;
+        host.shadowRoot.appendChild(style);
+        setIsUIHidden(true);
+        return true; // Стиль применен
+      }
+      return false;
+    };
+
+    // Пробуем применить сразу
+    if (!applyStyle()) {
+      // Если элемента еще нет, проверяем каждые 500мс (на случай долгой загрузки)
+      const interval = setInterval(() => {
+        if (applyStyle()) clearInterval(interval);
+      }, 500);
+      return () => clearInterval(interval);
+    }
+  }, []);
+
   return (
     <div
       className="scanner-container"
-      style={{ visibility: isReady ? "visible" : "hidden" }}
+      style={{ visibility: isReady && isUIHidden ? "visible" : "hidden" }}
     >
       <video
         ref={videoRef}

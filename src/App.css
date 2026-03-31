@@ -74,3 +74,8 @@
 .console-info {
   color: rgba(100, 200, 255, 0.9);
 }
+
+scanner-ui .scan-region,
+.u-scanner-ui__watermark {
+  background-color: aqua !important;
+}
