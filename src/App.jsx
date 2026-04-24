@@ -58,8 +58,7 @@ function App() {
           const currentZoom = currentZoomRef.current ?? minZoom;
 
           // Вычисляем новый уровень зума
-          let newZoom =
-            minZoom + currentZoom + (percent / 100) * (maxZoom - minZoom);
+          let newZoom = currentZoom + (percent / 100) * (maxZoom - minZoom);
           newZoom = Math.max(minZoom, Math.min(maxZoom, newZoom));
 
           // Округляем до шага
@@ -109,9 +108,7 @@ function App() {
 
             // Нормализуем значение от 0 до 1 в диапазон камеры
             let newFocus =
-              minFocus +
-              currentFocusDistance +
-              (percent / 100) * (maxFocus - minFocus);
+              currentFocusDistance + (percent / 100) * (maxFocus - minFocus);
 
             // Округляем до шага
             newFocus = Math.round(newFocus / step) * step;

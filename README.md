@@ -264,6 +264,34 @@ window.dataMatrixApp.deactivate();
 window.dataMatrixApp.restart();
 ```
 
+### Управление камерой
+
+#### camZoom(percent)
+
+Изменяет зум камеры на указанный процент от диапазона.
+Положительное значение приближает, отрицательное отдаляет.
+
+```javascript
+// Приблизить на 10%
+window.dataMatrixApp.camZoom(10);
+
+// Отдалить на 10%
+window.dataMatrixApp.camZoom(-10);
+```
+
+#### camFocus(focusDistance)
+
+Устанавливает расстояние фокуса камеры.
+Значение `0` включает автофокус, любое другое значение переключает на ручной режим.
+
+```javascript
+// Автофокус
+window.dataMatrixApp.camFocus(0);
+
+// Ручной фокус (0.5 - среднее значение)
+window.dataMatrixApp.camFocus(0.5);
+```
+
 ### Пример интеграции в поп-ап
 
 ```html
