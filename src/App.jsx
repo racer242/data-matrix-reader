@@ -6,11 +6,30 @@ import "./App.css";
 function App() {
   const [logs, setLogs] = useState([]);
   const cameraTrackRef = useRef(null);
+  const cameraCapabilitiesRef = useRef(null);
+  const currentZoomRef = useRef(null);
+  const currentFocusDistanceRef = useRef(null);
 
   // Обработчик получения видеотрека от сканера
   const handleCameraTrackReady = useCallback((track) => {
     cameraTrackRef.current = track;
-    handleLog("capabilities", track.getCapabilities());
+    const capabilities = track.getCapabilities();
+    const settings = track.getSettings();
+    cameraCapabilitiesRef.current = capabilities;
+
+    // Инициализируем начальные значения
+    if (capabilities.zoom) {
+      currentZoomRef.current = settings.zoom ?? null;
+    }
+    if (capabilities.focusDistance) {
+      currentFocusDistanceRef.current = settings.focusDistance ?? null;
+    }
+
+    handleLog("capabilities", capabilities);
+    handleLog("initial-settings", {
+      zoom: currentZoomRef.current,
+      focusDistance: currentFocusDistanceRef.current,
+    });
   }, []);
 
   // Регистрируем колбэки для глобального управления камерой
@@ -19,12 +38,10 @@ function App() {
       // Управление зумом камеры через MediaStream API
       window.dataMatrixApp.setCameraZoom = async (percent) => {
         const track = cameraTrackRef.current;
-        if (!track) return;
+        const capabilities = cameraCapabilitiesRef.current;
+        if (!track || !capabilities) return;
 
         try {
-          const capabilities = track.getCapabilities();
-          const settings = track.getSettings();
-
           // Проверяем поддержку зума камерой
           if (!capabilities.zoom) {
             handleLog(
@@ -35,10 +52,10 @@ function App() {
             return;
           }
 
-          const currentZoom = settings.zoom || 1;
           const minZoom = capabilities.zoom?.min || 1;
           const maxZoom = capabilities.zoom?.max || 1;
           const step = capabilities.zoom?.step || 0.1;
+          const currentZoom = currentZoomRef.current ?? minZoom;
 
           // Вычисляем новый уровень зума
           let newZoom =
@@ -47,6 +64,9 @@ function App() {
 
           // Округляем до шага
           newZoom = Math.round(newZoom / step) * step;
+
+          // Сохраняем новое значение
+          currentZoomRef.current = newZoom;
 
           handleLog("camera-zoom-changed", newZoom);
 
@@ -65,11 +85,10 @@ function App() {
       // Управление фокусом камеры через MediaStream API
       window.dataMatrixApp.setCameraFocus = async (percent) => {
         const track = cameraTrackRef.current;
-        if (!track) return;
+        const capabilities = cameraCapabilitiesRef.current;
+        if (!track || !capabilities) return;
 
         try {
-          const capabilities = track.getCapabilities();
-          const settings = track.getSettings();
           // Проверяем поддержку фокуса камерой
           if (!capabilities.focusDistance) {
             handleLog(
@@ -80,24 +99,26 @@ function App() {
             return;
           }
 
-          let newFocus = 0;
+          const minFocus = capabilities.focusDistance?.min || 0;
+          const maxFocus = capabilities.focusDistance?.max || 1;
+          const step = capabilities.focusDistance?.step || 0.01;
 
           if (percent !== 0) {
-            const currentFocusDistance = settings.focusDistance || 1;
-            const minFocus = capabilities.focusDistance?.min || 0;
-            const maxFocus = capabilities.focusDistance?.max || 1;
-            const step = capabilities.focusDistance?.step || 0.01;
+            const currentFocusDistance =
+              currentFocusDistanceRef.current ?? minFocus;
 
             // Нормализуем значение от 0 до 1 в диапазон камеры
-            newFocus =
+            let newFocus =
               minFocus +
               currentFocusDistance +
               (percent / 100) * (maxFocus - minFocus);
 
             // Округляем до шага
             newFocus = Math.round(newFocus / step) * step;
-
             newFocus = Math.max(minFocus, Math.min(maxFocus, newFocus));
+
+            // Сохраняем новое значение
+            currentFocusDistanceRef.current = newFocus;
 
             handleLog("camera-focus-changed", {
               currentFocusDistance,
@@ -106,17 +127,28 @@ function App() {
               minFocus,
               maxFocus,
             });
+
+            await track.applyConstraints({
+              advanced: [
+                {
+                  focusMode: "manual",
+                  focusDistance: newFocus,
+                },
+              ],
+            });
           } else {
+            // Автофокус - сбрасываем сохраненное значение
+            currentFocusDistanceRef.current = null;
             handleLog("camera-focus-changed", "Автофокус");
+
+            await track.applyConstraints({
+              advanced: [
+                {
+                  focusMode: "continuous",
+                },
+              ],
+            });
           }
-          await track.applyConstraints({
-            advanced: [
-              {
-                focusMode: percent === 0 ? "continuous" : "manual",
-                focusDistance: newFocus,
-              },
-            ],
-          });
         } catch (err) {
           handleLog("camera-error", {
             message: "Ошибка управления фокусом камеры",
