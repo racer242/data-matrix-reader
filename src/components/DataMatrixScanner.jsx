@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { UScanner } from "@utrace/u-scanner";
 
-function DataMatrixScanner({ onEvent, onLog }) {
+function DataMatrixScanner({ onEvent, onLog, videoVisible = true }) {
   const videoRef = useRef(null);
   const uscannerRef = useRef(null);
   const [isReady, setIsReady] = useState(false);
@@ -180,7 +180,10 @@ function DataMatrixScanner({ onEvent, onLog }) {
   return (
     <div
       className="scanner-container"
-      style={{ visibility: isReady && isUIHidden ? "visible" : "hidden" }}
+      style={{
+        visibility:
+          isReady && isUIHidden && videoVisible ? "visible" : "hidden",
+      }}
     >
       <video
         ref={videoRef}

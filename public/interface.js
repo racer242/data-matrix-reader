@@ -22,7 +22,7 @@ window.dataMatrixApp = {
      * Показывать консоль поверх экрана
      * По умолчанию false
      */
-    showConsole: true,
+    showConsole: false,
 
     /**
      * URL API для отправки данных сканирования

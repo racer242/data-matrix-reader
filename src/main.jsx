@@ -6,6 +6,9 @@ import App from "./App.jsx";
 // Внутренняя переменная для хранения экземпляра root
 let appRoot = null;
 
+// Инициализируем глобальный объект, если еще не создан
+window.dataMatrixApp = window.dataMatrixApp || {};
+
 /**
  * Инициализация приложения
  * @returns {object|null} Экземпляр root или null при ошибке
@@ -58,6 +61,22 @@ window.dataMatrixApp.deactivate = () => {
 window.dataMatrixApp.restart = () => {
   window.dataMatrixApp.deactivate();
   setTimeout(window.dataMatrixApp.activate, 0);
+};
+
+/**
+ * тест камеры - переключает видимость видео
+ * @param {boolean} [visible] - если передано, устанавливает указанное состояние, иначе переключает
+ */
+window.dataMatrixApp.camTest = (visible) => {
+  const app = window.dataMatrixApp;
+  if (app?.setVideoVisible) {
+    if (typeof visible === "boolean") {
+      app.setVideoVisible(visible);
+    } else {
+      // Переключаем текущее состояние
+      app.setVideoVisible(!app.videoVisible);
+    }
+  }
 };
 
 // Экспорт для внешнего использования (опционально)

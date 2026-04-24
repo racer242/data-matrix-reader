@@ -1,10 +1,32 @@
-import { useState, useCallback } from "react";
+import { useState, useCallback, useEffect } from "react";
 import axios from "axios";
 import DataMatrixScanner from "./components/DataMatrixScanner";
 import "./App.css";
 
 function App() {
   const [logs, setLogs] = useState([]);
+  const [videoVisible, setVideoVisible] = useState(true);
+
+  // Регистрируем колбэк для глобального управления видимостью
+  useEffect(() => {
+    // Устанавливаем колбэк, который будет вызывать setVideoVisible из main.jsx
+    if (window.dataMatrixApp) {
+      window.dataMatrixApp._setVideoVisibleState = setVideoVisible;
+    }
+
+    // Переопределяем setVideoVisible в глобальном объекте для прямой связи
+    window.dataMatrixApp.setVideoVisible = (value) => {
+      setVideoVisible(
+        typeof value === "function" ? value(videoVisible) : value,
+      );
+    };
+
+    // Обновляем геттер для videoVisible
+    Object.defineProperty(window.dataMatrixApp, "videoVisible", {
+      get: () => videoVisible,
+      configurable: true,
+    });
+  }, [videoVisible]);
 
   const handleLog = useCallback((type, data) => {
     const message =
@@ -100,7 +122,11 @@ function App() {
 
   return (
     <div className="app">
-      <DataMatrixScanner onEvent={handleEvent} onLog={handleLog} />
+      <DataMatrixScanner
+        onEvent={handleEvent}
+        onLog={handleLog}
+        videoVisible={videoVisible}
+      />
       {window.dataMatrixApp?.config?.showConsole && (
         <div className="console-overlay">
           {logs.map((log, index) => (
