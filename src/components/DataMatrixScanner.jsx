@@ -1,30 +1,51 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, useCallback } from "react";
 import { UScanner } from "@utrace/u-scanner";
 
-function DataMatrixScanner({ onEvent, onLog, videoVisible = true }) {
+function DataMatrixScanner({
+  onEvent,
+  onLog,
+  videoVisible = true,
+  config = {},
+  onCameraTrackReady,
+}) {
   const videoRef = useRef(null);
   const uscannerRef = useRef(null);
-  const zoomLevelRef = useRef(1);
   const [isReady, setIsReady] = useState(false);
   const [isUIHidden, setIsUIHidden] = useState(false);
   const [isScanning, setIsScanning] = useState(false);
   const onEventRef = useRef(onEvent);
   const onLogRef = useRef(onLog);
+  const onCameraTrackReadyRef = useRef(onCameraTrackReady);
 
   // Реф для отслеживания последних событий
   const lastEventRef = useRef({ key: null, timestamp: 0 });
 
-  // Обновляем ref при изменении onEvent и onLog
+  // Обновляем refs при изменении пропсов
   useEffect(() => {
     onEventRef.current = onEvent;
     onLogRef.current = onLog;
-  }, [onEvent, onLog]);
+    onCameraTrackReadyRef.current = onCameraTrackReady;
+  }, [onEvent, onLog, onCameraTrackReady]);
+
+  // Сообщаем наружу о готовности видеотрека
+  const emitCameraTrack = useCallback(() => {
+    const video = videoRef.current;
+    if (video?.srcObject && onCameraTrackReadyRef.current) {
+      const tracks = video.srcObject.getVideoTracks();
+      if (tracks.length > 0) {
+        onCameraTrackReadyRef.current(tracks[0]);
+      }
+    }
+  }, []);
 
   useEffect(() => {
     const initScanner = async () => {
       if (!videoRef.current) {
         return;
       }
+
+      const duplicateTimeout = config?.duplicateTimeout ?? 3000;
+      const catchOnce = config?.catchOnce !== false;
 
       try {
         const scanner = new UScanner({
@@ -37,13 +58,10 @@ function DataMatrixScanner({ onEvent, onLog, videoVisible = true }) {
         scanner.on("scan-success", ({ codeData }) => {
           const key = "success:" + JSON.stringify(codeData);
           const now = Date.now();
-          const timeout =
-            window.dataMatrixApp?.config?.duplicateTimeout || 3000;
 
-          // Пропускаем дубликат в пределах таймаута
           if (
             lastEventRef.current.key === key &&
-            now - lastEventRef.current.timestamp < timeout
+            now - lastEventRef.current.timestamp < duplicateTimeout
           ) {
             return;
           }
@@ -52,15 +70,13 @@ function DataMatrixScanner({ onEvent, onLog, videoVisible = true }) {
           onEventRef.current?.("dataMatrixSuccess", codeData);
           onLogRef.current?.("scan-success", codeData);
 
-          // Остановить сканер после первого успешного сканирования
-          if (window.dataMatrixApp?.config?.catchOnce !== false) {
+          if (catchOnce) {
             scanner.stop();
           }
         });
 
-        // Ошибка в процессе сканирования (не останавливает сканирование)
+        // Ошибка в процессе сканирования
         scanner.on("scan-error", ({ error }) => {
-          // Игнорируем пустые объекты ошибок
           if (
             !error ||
             (typeof error === "object" && Object.keys(error).length === 0)
@@ -70,13 +86,10 @@ function DataMatrixScanner({ onEvent, onLog, videoVisible = true }) {
 
           const key = "error:" + (error.message || error.toString());
           const now = Date.now();
-          const timeout =
-            window.dataMatrixApp?.config?.duplicateTimeout || 3000;
 
-          // Пропускаем дубликат в пределах таймаута
           if (
             lastEventRef.current.key === key &&
-            now - lastEventRef.current.timestamp < timeout
+            now - lastEventRef.current.timestamp < duplicateTimeout
           ) {
             return;
           }
@@ -96,12 +109,10 @@ function DataMatrixScanner({ onEvent, onLog, videoVisible = true }) {
         scanner.on("scanner-started", ({ cameraData, scanEngine }) => {
           onEventRef.current?.("camAccessSuccess", cameraData);
           onLogRef.current?.("scanner-started", { cameraData, scanEngine });
-          // Сохраняем объект камеры для управления зумом
-          if (cameraData?.camera) {
-            uscannerRef.current._camera = cameraData.camera;
-          }
           setIsReady(true);
           setIsScanning(true);
+          // Сообщаем о готовности трека
+          setTimeout(emitCameraTrack, 0);
         });
 
         // Сканер начинает запуск
@@ -125,7 +136,6 @@ function DataMatrixScanner({ onEvent, onLog, videoVisible = true }) {
 
         // Изменение зума
         scanner.on("zoom-changed", ({ value }) => {
-          zoomLevelRef.current = value;
           onLogRef.current?.("zoom-changed", { value });
         });
 
@@ -137,7 +147,6 @@ function DataMatrixScanner({ onEvent, onLog, videoVisible = true }) {
         // Запуск сканера
         await scanner.start;
       } catch (err) {
-        // Обработка ошибок инициализации
         onLogRef.current?.("init-error", err);
         onEventRef.current?.("camAccessError", err);
       }
@@ -151,50 +160,27 @@ function DataMatrixScanner({ onEvent, onLog, videoVisible = true }) {
         uscannerRef.current = null;
       }
     };
-  }, []);
-
-  // Экспортируем videoRef и функции управления камерой в глобальный объект
-  useEffect(() => {
-    if (videoRef.current) {
-      window.dataMatrixApp = window.dataMatrixApp || {};
-      window.dataMatrixApp.videoElement = videoRef.current;
-      window.dataMatrixApp.zoomLevel = zoomLevelRef.current;
-
-      // Функция получения текущего видеотрека
-      window.dataMatrixApp.getVideoTrack = () => {
-        const video = videoRef.current;
-        if (video?.srcObject) {
-          const tracks = video.srcObject.getVideoTracks();
-          return tracks.length > 0 ? tracks[0] : null;
-        }
-        return null;
-      };
-    }
-  }, []);
+  }, [config, emitCameraTrack]);
 
   useEffect(() => {
     const applyStyle = () => {
-      // Ищем элемент по тегу
       const host = document.querySelector("scanner-ui");
 
       if (host && host.shadowRoot) {
         const style = document.createElement("style");
         style.textContent = `
-        /* :host выбирает сам корень scanner-ui внутри shadow dom */
         .u-scanner-ui__watermark, .u-scanner-ui__control-panel { 
           display: none !important;
         }
       `;
         host.shadowRoot.appendChild(style);
         setIsUIHidden(true);
-        return true; // Стиль применен
+        return true;
       }
       return false;
     };
 
-    // Пробуем применить сразу
     if (!applyStyle()) {
-      // Если элемента еще нет, проверяем каждые 500мс (на случай долгой загрузки)
       const interval = setInterval(() => {
         if (applyStyle()) clearInterval(interval);
       }, 500);
