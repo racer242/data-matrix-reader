@@ -7,25 +7,39 @@ function App() {
   const [logs, setLogs] = useState([]);
   const [videoVisible, setVideoVisible] = useState(true);
 
-  // Регистрируем колбэк для глобального управления видимостью
+  // Регистрируем колбэки для глобального управления
   useEffect(() => {
-    // Устанавливаем колбэк, который будет вызывать setVideoVisible из main.jsx
     if (window.dataMatrixApp) {
       window.dataMatrixApp._setVideoVisibleState = setVideoVisible;
     }
 
-    // Переопределяем setVideoVisible в глобальном объекте для прямой связи
+    // Управление видимостью видео
     window.dataMatrixApp.setVideoVisible = (value) => {
       setVideoVisible(
         typeof value === "function" ? value(videoVisible) : value,
       );
     };
 
-    // Обновляем геттер для videoVisible
     Object.defineProperty(window.dataMatrixApp, "videoVisible", {
       get: () => videoVisible,
       configurable: true,
     });
+
+    // Управление зумом камеры (приближение на указанный процент)
+    window.dataMatrixApp.setCameraZoom = (percent) => {
+      const scanner = document.querySelector("scanner-ui");
+      if (scanner?.shadowRoot) {
+        const video = scanner.shadowRoot.querySelector("video");
+        if (video) {
+          const currentZoom = parseFloat(
+            video.style.transform?.replace("scale(", "") || "1",
+          );
+          const newZoom = currentZoom + percent / 100;
+          video.style.transform = `scale(${Math.max(1, newZoom)})`;
+          video.style.transition = "transform 0.3s ease";
+        }
+      }
+    };
   }, [videoVisible]);
 
   const handleLog = useCallback((type, data) => {

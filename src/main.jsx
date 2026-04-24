@@ -64,18 +64,29 @@ window.dataMatrixApp.restart = () => {
 };
 
 /**
- * тест камеры - переключает видимость видео
- * @param {boolean} [visible] - если передано, устанавливает указанное состояние, иначе переключает
+ * тест камеры - управляет видимостью видео и зумом камеры
+ * @param {boolean|object} [options] - параметры:
+ *   - boolean: переключает видимость
+ *   - object: { visible?: boolean, zoom?: number }
  */
-window.dataMatrixApp.camTest = (visible) => {
+window.dataMatrixApp.camTest = (options) => {
   const app = window.dataMatrixApp;
-  if (app?.setVideoVisible) {
-    if (typeof visible === "boolean") {
-      app.setVideoVisible(visible);
-    } else {
-      // Переключаем текущее состояние
-      app.setVideoVisible(!app.videoVisible);
+  if (!app) return;
+
+  // Управление видимостью
+  if (typeof options === "boolean") {
+    app.setVideoVisible?.(options);
+  } else if (typeof options === "object") {
+    if ("visible" in options) {
+      app.setVideoVisible?.(options.visible);
     }
+    // Управление зумом (приближение на указанный процент)
+    if ("zoom" in options && app.setCameraZoom) {
+      app.setCameraZoom(options.zoom);
+    }
+  } else {
+    // Переключаем текущее состояние видимости
+    app.setVideoVisible?.(!app.videoVisible);
   }
 };
 

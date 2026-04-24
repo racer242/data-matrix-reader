@@ -4,6 +4,7 @@ import { UScanner } from "@utrace/u-scanner";
 function DataMatrixScanner({ onEvent, onLog, videoVisible = true }) {
   const videoRef = useRef(null);
   const uscannerRef = useRef(null);
+  const zoomLevelRef = useRef(1);
   const [isReady, setIsReady] = useState(false);
   const [isUIHidden, setIsUIHidden] = useState(false);
   const [isScanning, setIsScanning] = useState(false);
@@ -95,6 +96,10 @@ function DataMatrixScanner({ onEvent, onLog, videoVisible = true }) {
         scanner.on("scanner-started", ({ cameraData, scanEngine }) => {
           onEventRef.current?.("camAccessSuccess", cameraData);
           onLogRef.current?.("scanner-started", { cameraData, scanEngine });
+          // Сохраняем объект камеры для управления зумом
+          if (cameraData?.camera) {
+            uscannerRef.current._camera = cameraData.camera;
+          }
           setIsReady(true);
           setIsScanning(true);
         });
@@ -120,6 +125,7 @@ function DataMatrixScanner({ onEvent, onLog, videoVisible = true }) {
 
         // Изменение зума
         scanner.on("zoom-changed", ({ value }) => {
+          zoomLevelRef.current = value;
           onLogRef.current?.("zoom-changed", { value });
         });
 
