@@ -83,12 +83,15 @@ function DataMatrixScanner({
             return;
           }
 
-          const key = "error:" + (error.message || error.toString());
+          const key =
+            "error:" + (error.message || error.name || error.toString());
           const now = Date.now();
 
           if (
-            lastEventRef.current.key === key &&
-            now - lastEventRef.current.timestamp < duplicateTimeout
+            (lastEventRef.current.key === key &&
+              now - lastEventRef.current.timestamp < duplicateTimeout) ||
+            key === "error:FormatException2" ||
+            key === "error:NotFoundException2"
           ) {
             return;
           }

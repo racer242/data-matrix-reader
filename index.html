@@ -67,7 +67,11 @@
       }, 100);
     });
   </script>
-  <button onclick="window.dataMatrixApp.camTest({zoom:true})">TEST</button>
+  <button onclick="window.dataMatrixApp.camZoom(+10)">z+</button>
+  <button onclick="window.dataMatrixApp.camZoom(-10)">z-</button>
+  <button onclick="window.dataMatrixApp.camFocus(+10)">f+</button>
+  <button onclick="window.dataMatrixApp.camFocus(-10)">f-</button>
+  <button onclick="window.dataMatrixApp.camFocus(0)">af</button>
 </body>
 
 </html>

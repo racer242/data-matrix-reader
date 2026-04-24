@@ -10,6 +10,7 @@ function App() {
   // Обработчик получения видеотрека от сканера
   const handleCameraTrackReady = useCallback((track) => {
     cameraTrackRef.current = track;
+    handleLog("capabilities", track.getCapabilities());
   }, []);
 
   // Регистрируем колбэки для глобального управления камерой
@@ -26,6 +27,10 @@ function App() {
 
           // Проверяем поддержку зума камерой
           if (!capabilities.zoom) {
+            handleLog(
+              "camera-error",
+              "Камера не поддерживает управление зумом",
+            );
             console.warn("Камера не поддерживает управление зумом");
             return;
           }
@@ -36,49 +41,88 @@ function App() {
           const step = capabilities.zoom?.step || 0.1;
 
           // Вычисляем новый уровень зума
-          let newZoom = currentZoom + (percent / 100) * (maxZoom - minZoom);
+          let newZoom =
+            minZoom + currentZoom + (percent / 100) * (maxZoom - minZoom);
           newZoom = Math.max(minZoom, Math.min(maxZoom, newZoom));
 
           // Округляем до шага
           newZoom = Math.round(newZoom / step) * step;
 
+          handleLog("camera-zoom-changed", newZoom);
+
           await track.applyConstraints({
             advanced: [{ zoom: newZoom }],
           });
         } catch (err) {
+          handleLog("camera-error", {
+            message: "Ошибка управления зумом камеры",
+            err,
+          });
           console.error("Ошибка управления зумом камеры:", err);
         }
       };
 
       // Управление фокусом камеры через MediaStream API
-      window.dataMatrixApp.setCameraFocus = async (focusDistance) => {
+      window.dataMatrixApp.setCameraFocus = async (percent) => {
         const track = cameraTrackRef.current;
         if (!track) return;
 
         try {
           const capabilities = track.getCapabilities();
-
+          const settings = track.getSettings();
           // Проверяем поддержку фокуса камерой
           if (!capabilities.focusDistance) {
+            handleLog(
+              "camera-error",
+              "Камера не поддерживает управление фокусом",
+            );
             console.warn("Камера не поддерживает управление фокусом");
             return;
           }
 
-          const minFocus = capabilities.focusDistance?.min || 0;
-          const maxFocus = capabilities.focusDistance?.max || 1;
-          const step = capabilities.focusDistance?.step || 0.01;
+          let newFocus = 0;
 
-          // Нормализуем значение от 0 до 1 в диапазон камеры
-          let newFocus = minFocus + focusDistance * (maxFocus - minFocus);
-          newFocus = Math.max(minFocus, Math.min(maxFocus, newFocus));
+          if (percent !== 0) {
+            const currentFocusDistance = settings.focusDistance || 1;
+            const minFocus = capabilities.focusDistance?.min || 0;
+            const maxFocus = capabilities.focusDistance?.max || 1;
+            const step = capabilities.focusDistance?.step || 0.01;
 
-          // Округляем до шага
-          newFocus = Math.round(newFocus / step) * step;
+            // Нормализуем значение от 0 до 1 в диапазон камеры
+            newFocus =
+              minFocus +
+              currentFocusDistance +
+              (percent / 100) * (maxFocus - minFocus);
 
+            // Округляем до шага
+            newFocus = Math.round(newFocus / step) * step;
+
+            newFocus = Math.max(minFocus, Math.min(maxFocus, newFocus));
+
+            handleLog("camera-focus-changed", {
+              currentFocusDistance,
+              step,
+              newFocus,
+              minFocus,
+              maxFocus,
+            });
+          } else {
+            handleLog("camera-focus-changed", "Автофокус");
+          }
           await track.applyConstraints({
-            advanced: [{ focusDistance: newFocus }],
+            advanced: [
+              {
+                focusMode: percent === 0 ? "continuous" : "manual",
+                focusDistance: newFocus,
+              },
+            ],
           });
         } catch (err) {
+          handleLog("camera-error", {
+            message: "Ошибка управления фокусом камеры",
+            name: err.name,
+            msg: err.message,
+          });
           console.error("Ошибка управления фокусом камеры:", err);
         }
       };
