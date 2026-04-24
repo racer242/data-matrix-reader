@@ -25,16 +25,43 @@ function App() {
       configurable: true,
     });
 
-    // Управление зумом камеры (приближение на указанный процент)
-    window.dataMatrixApp.setCameraZoom = (percent) => {
-      const video = window.dataMatrixApp?.videoElement;
-      if (video) {
-        const currentZoom = parseFloat(
-          video.style.transform?.replace("scale(", "") || "1",
-        );
-        const newZoom = currentZoom + percent / 100;
-        video.style.transform = `scale(${Math.max(1, newZoom)})`;
-        video.style.transition = "transform 0.3s ease";
+    // Управление зумом камеры через MediaStream API
+    window.dataMatrixApp.setCameraZoom = async (percent) => {
+      const getVideoTrack = window.dataMatrixApp?.getVideoTrack;
+      if (!getVideoTrack) return;
+
+      const track = getVideoTrack();
+      if (!track) return;
+
+      try {
+        const capabilities = track.getCapabilities();
+        const settings = track.getSettings();
+
+        // Проверяем поддержку зума камерой
+        if (!capabilities.zoom) {
+          console.warn("Камера не поддерживает управление зумом");
+          return;
+        }
+
+        const currentZoom = settings.zoom || 1;
+        const minZoom = capabilities.zoom?.min || 1;
+        const maxZoom = capabilities.zoom?.max || 1;
+        const step = capabilities.zoom?.step || 0.1;
+
+        // Вычисляем новый уровень зума
+        let newZoom = currentZoom + (percent / 100) * (maxZoom - minZoom);
+        newZoom = Math.max(minZoom, Math.min(maxZoom, newZoom));
+
+        // Округляем до шага
+        newZoom = Math.round(newZoom / step) * step;
+
+        await track.applyConstraints({
+          advanced: [{ zoom: newZoom }],
+        });
+
+        window.dataMatrixApp.zoomLevel = newZoom;
+      } catch (err) {
+        console.error("Ошибка управления зумом камеры:", err);
       }
     };
   }, [videoVisible]);

@@ -153,11 +153,22 @@ function DataMatrixScanner({ onEvent, onLog, videoVisible = true }) {
     };
   }, []);
 
-  // Экспортируем videoRef в глобальный объект для управления зумом
+  // Экспортируем videoRef и функции управления камерой в глобальный объект
   useEffect(() => {
     if (videoRef.current) {
       window.dataMatrixApp = window.dataMatrixApp || {};
       window.dataMatrixApp.videoElement = videoRef.current;
+      window.dataMatrixApp.zoomLevel = zoomLevelRef.current;
+
+      // Функция получения текущего видеотрека
+      window.dataMatrixApp.getVideoTrack = () => {
+        const video = videoRef.current;
+        if (video?.srcObject) {
+          const tracks = video.srcObject.getVideoTracks();
+          return tracks.length > 0 ? tracks[0] : null;
+        }
+        return null;
+      };
     }
   }, []);
 
