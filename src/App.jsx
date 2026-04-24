@@ -5,7 +5,6 @@ import "./App.css";
 
 function App() {
   const [logs, setLogs] = useState([]);
-  const [videoVisible, setVideoVisible] = useState(true);
   const cameraTrackRef = useRef(null);
 
   // Обработчик получения видеотрека от сканера
@@ -13,19 +12,9 @@ function App() {
     cameraTrackRef.current = track;
   }, []);
 
-  // Регистрируем колбэки для глобального управления
+  // Регистрируем колбэки для глобального управления камерой
   useEffect(() => {
     if (window.dataMatrixApp) {
-      // Управление видимостью видео
-      window.dataMatrixApp.setVideoVisible = (value) => {
-        setVideoVisible(typeof value === "boolean" ? value : !videoVisible);
-      };
-
-      Object.defineProperty(window.dataMatrixApp, "videoVisible", {
-        get: () => videoVisible,
-        configurable: true,
-      });
-
       // Управление зумом камеры через MediaStream API
       window.dataMatrixApp.setCameraZoom = async (percent) => {
         const track = cameraTrackRef.current;
@@ -60,8 +49,41 @@ function App() {
           console.error("Ошибка управления зумом камеры:", err);
         }
       };
+
+      // Управление фокусом камеры через MediaStream API
+      window.dataMatrixApp.setCameraFocus = async (focusDistance) => {
+        const track = cameraTrackRef.current;
+        if (!track) return;
+
+        try {
+          const capabilities = track.getCapabilities();
+
+          // Проверяем поддержку фокуса камерой
+          if (!capabilities.focusDistance) {
+            console.warn("Камера не поддерживает управление фокусом");
+            return;
+          }
+
+          const minFocus = capabilities.focusDistance?.min || 0;
+          const maxFocus = capabilities.focusDistance?.max || 1;
+          const step = capabilities.focusDistance?.step || 0.01;
+
+          // Нормализуем значение от 0 до 1 в диапазон камеры
+          let newFocus = minFocus + focusDistance * (maxFocus - minFocus);
+          newFocus = Math.max(minFocus, Math.min(maxFocus, newFocus));
+
+          // Округляем до шага
+          newFocus = Math.round(newFocus / step) * step;
+
+          await track.applyConstraints({
+            advanced: [{ focusDistance: newFocus }],
+          });
+        } catch (err) {
+          console.error("Ошибка управления фокусом камеры:", err);
+        }
+      };
     }
-  }, [videoVisible]);
+  }, []);
 
   const handleLog = useCallback((type, data) => {
     const message =
@@ -152,7 +174,6 @@ function App() {
       <DataMatrixScanner
         onEvent={handleEvent}
         onLog={handleLog}
-        videoVisible={videoVisible}
         config={config}
         onCameraTrackReady={handleCameraTrackReady}
       />

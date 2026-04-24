@@ -4,7 +4,6 @@ import { UScanner } from "@utrace/u-scanner";
 function DataMatrixScanner({
   onEvent,
   onLog,
-  videoVisible = true,
   config = {},
   onCameraTrackReady,
 }) {
@@ -192,8 +191,7 @@ function DataMatrixScanner({
     <div
       className="scanner-container"
       style={{
-        visibility:
-          isReady && isUIHidden && videoVisible ? "visible" : "hidden",
+        visibility: isReady && isUIHidden ? "visible" : "hidden",
       }}
     >
       <video

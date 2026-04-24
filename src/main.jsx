@@ -64,29 +64,24 @@ window.dataMatrixApp.restart = () => {
 };
 
 /**
- * тест камеры - управляет видимостью видео и зумом камеры
- * @param {boolean|object} [options] - параметры:
- *   - boolean: переключает видимость
- *   - object: { visible?: boolean, zoom?: number }
+ * Управление зумом камеры
+ * @param {number} value - положительное значение для приближения, отрицательное для удаления
  */
-window.dataMatrixApp.camTest = (options) => {
+window.dataMatrixApp.camZoom = (value) => {
   const app = window.dataMatrixApp;
-  if (!app) return;
+  if (app?.setCameraZoom && typeof value === "number") {
+    app.setCameraZoom(value);
+  }
+};
 
-  // Управление видимостью
-  if (typeof options === "boolean") {
-    app.setVideoVisible?.(options);
-  } else if (typeof options === "object") {
-    if ("visible" in options) {
-      app.setVideoVisible?.(options.visible);
-    }
-    // Управление зумом (приближение на указанный процент)
-    if ("zoom" in options && app.setCameraZoom) {
-      app.setCameraZoom(options.zoom);
-    }
-  } else {
-    // Переключаем текущее состояние видимости
-    app.setVideoVisible?.(!app.videoVisible);
+/**
+ * Управление фокусом камеры
+ * @param {number} focusDistance - расстояние фокуса от 0 до 1
+ */
+window.dataMatrixApp.camFocus = (focusDistance) => {
+  const app = window.dataMatrixApp;
+  if (app?.setCameraFocus && typeof focusDistance === "number") {
+    app.setCameraFocus(focusDistance);
   }
 };
 
