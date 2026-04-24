@@ -27,17 +27,14 @@ function App() {
 
     // Управление зумом камеры (приближение на указанный процент)
     window.dataMatrixApp.setCameraZoom = (percent) => {
-      const scanner = document.querySelector("scanner-ui");
-      if (scanner?.shadowRoot) {
-        const video = scanner.shadowRoot.querySelector("video");
-        if (video) {
-          const currentZoom = parseFloat(
-            video.style.transform?.replace("scale(", "") || "1",
-          );
-          const newZoom = currentZoom + percent / 100;
-          video.style.transform = `scale(${Math.max(1, newZoom)})`;
-          video.style.transition = "transform 0.3s ease";
-        }
+      const video = window.dataMatrixApp?.videoElement;
+      if (video) {
+        const currentZoom = parseFloat(
+          video.style.transform?.replace("scale(", "") || "1",
+        );
+        const newZoom = currentZoom + percent / 100;
+        video.style.transform = `scale(${Math.max(1, newZoom)})`;
+        video.style.transition = "transform 0.3s ease";
       }
     };
   }, [videoVisible]);

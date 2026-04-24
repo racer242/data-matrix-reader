@@ -153,6 +153,14 @@ function DataMatrixScanner({ onEvent, onLog, videoVisible = true }) {
     };
   }, []);
 
+  // Экспортируем videoRef в глобальный объект для управления зумом
+  useEffect(() => {
+    if (videoRef.current) {
+      window.dataMatrixApp = window.dataMatrixApp || {};
+      window.dataMatrixApp.videoElement = videoRef.current;
+    }
+  }, []);
+
   useEffect(() => {
     const applyStyle = () => {
       // Ищем элемент по тегу
