@@ -70,6 +70,24 @@ window.dataMatrixApp = {
   },
 
   /**
+   * Изменить фокус камеры
+   * @param step процентное значение от 1 до 100. Если 0 - переключить на автофокус
+   */
+  camFocus: function (step) {
+    console.log("DataMatrix Scanner: camFocus() called");
+    // Функция будет определена в main.jsx после загрузки модуля
+  },
+
+  /**
+   * Изменить фокус камеры
+   * @param step процентное значение от 0 до 100
+   */
+  camZoom: function (step) {
+    console.log("DataMatrix Scanner: camZoom() called");
+    // Функция будет определена в main.jsx после загрузки модуля
+  },
+
+  /**
    * Обработчики событий (заглушки, будут заменены в main.jsx)
    */
   on: {
@@ -78,6 +96,9 @@ window.dataMatrixApp = {
     },
     camAccessSuccess: function (cameraData) {
       console.log("camAccessSuccess:", cameraData);
+    },
+    camCapabilities: function (capabilities) {
+      console.log("camCapabilities:", capabilities);
     },
     camStarting: function () {
       console.log("camStarting");

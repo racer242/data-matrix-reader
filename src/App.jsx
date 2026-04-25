@@ -38,7 +38,7 @@ function App() {
   useEffect(() => {
     if (window.dataMatrixApp) {
       // Управление зумом камеры через MediaStream API
-      window.dataMatrixApp.setCameraZoom = async (percent) => {
+      window.dataMatrixApp.setCameraZoom = async (percent, loop = false) => {
         const track = cameraTrackRef.current;
         const capabilities = cameraCapabilitiesRef.current;
         if (!track || !capabilities) return;
@@ -61,7 +61,17 @@ function App() {
 
           // Вычисляем новый уровень зума
           let newZoom = currentZoom + (percent / 100) * (maxZoom - minZoom);
-          newZoom = Math.max(minZoom, Math.min(maxZoom, newZoom));
+
+          // Зацикленность: если вышли за границы, переключаемся на противоположный конец
+          if (loop) {
+            if (newZoom > maxZoom) {
+              newZoom = minZoom;
+            } else if (newZoom < minZoom) {
+              newZoom = maxZoom;
+            }
+          } else {
+            newZoom = Math.max(minZoom, Math.min(maxZoom, newZoom));
+          }
 
           // Округляем до шага
           newZoom = Math.round(newZoom / step) * step;
@@ -69,7 +79,7 @@ function App() {
           // Сохраняем новое значение
           currentZoomRef.current = newZoom;
 
-          handleLog("camera-zoom-changed", newZoom);
+          handleLog("camera-zoom-changed", { newZoom, loop });
 
           await track.applyConstraints({
             advanced: [{ zoom: newZoom }],
@@ -84,7 +94,7 @@ function App() {
       };
 
       // Управление фокусом камеры через MediaStream API
-      window.dataMatrixApp.setCameraFocus = async (percent) => {
+      window.dataMatrixApp.setCameraFocus = async (percent, loop = false) => {
         const track = cameraTrackRef.current;
         const capabilities = cameraCapabilitiesRef.current;
         if (!track || !capabilities) return;
@@ -112,9 +122,19 @@ function App() {
             let newFocus =
               currentFocusDistance + (percent / 100) * (maxFocus - minFocus);
 
+            // Зацикленность: если вышли за границы, переключаемся на противоположный конец
+            if (loop) {
+              if (newFocus > maxFocus) {
+                newFocus = minFocus;
+              } else if (newFocus < minFocus) {
+                newFocus = maxFocus;
+              }
+            } else {
+              newFocus = Math.max(minFocus, Math.min(maxFocus, newFocus));
+            }
+
             // Округляем до шага
             newFocus = Math.round(newFocus / step) * step;
-            newFocus = Math.max(minFocus, Math.min(maxFocus, newFocus));
 
             // Сохраняем новое значение
             currentFocusDistanceRef.current = newFocus;
@@ -125,6 +145,7 @@ function App() {
               newFocus,
               minFocus,
               maxFocus,
+              loop,
             });
 
             await track.applyConstraints({

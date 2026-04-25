@@ -66,22 +66,24 @@ window.dataMatrixApp.restart = () => {
 /**
  * Управление зумом камеры
  * @param {number} value - положительное значение для приближения, отрицательное для удаления
+ * @param {boolean} [loop=false] - если true, при достижении мин/макс переключается на противоположное значение
  */
-window.dataMatrixApp.camZoom = (value) => {
+window.dataMatrixApp.camZoom = (value, loop) => {
   const app = window.dataMatrixApp;
   if (app?.setCameraZoom && typeof value === "number") {
-    app.setCameraZoom(value);
+    app.setCameraZoom(value, loop);
   }
 };
 
 /**
  * Управление фокусом камеры
- * @param {number} focusDistance - расстояние фокуса от 0 до 1
+ * @param {number} focusDistance - процент изменения от диапазона
+ * @param {boolean} [loop=false] - если true, при достижении мин/макс переключается на противоположное значение
  */
-window.dataMatrixApp.camFocus = (focusDistance) => {
+window.dataMatrixApp.camFocus = (focusDistance, loop) => {
   const app = window.dataMatrixApp;
   if (app?.setCameraFocus && typeof focusDistance === "number") {
-    app.setCameraFocus(focusDistance);
+    app.setCameraFocus(focusDistance, loop);
   }
 };
 
