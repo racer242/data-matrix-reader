@@ -86,6 +86,30 @@ window.JWT = '';
 
 Вызывается при остановке камеры.
 
+#### camCapabilities(capabilities)
+
+Вызывается при готовности камеры. Содержит объект с возможностями камеры.
+
+**Параметры:**
+
+- `capabilities` — объект с возможностями камеры:
+  ```javascript
+  {
+    zoom: { min: number, max: number, step: number },         // Поддержка зума
+    focusDistance: { min: number, max: number, step: number } // Поддержка фокуса
+  }
+  ```
+
+**Пример:**
+
+```javascript
+window.dataMatrixApp.on.camCapabilities = function (capabilities) {
+  console.log("Возможности камеры:", capabilities);
+  // capabilities.zoom - поддерживает ли камера зум
+  // capabilities.focusDistance - поддерживает ли камера фокус
+};
+```
+
 ### События сканирования
 
 #### dataMatrixSuccess(codeData)
@@ -306,18 +330,6 @@ window.dataMatrixApp.camFocus(10);
 
 // С зацикленностью
 window.dataMatrixApp.camFocus(10, true);
-```
-
-#### camCapabilities(capabilities)
-
-Вызывается при готовности камеры. Содержит объект с возможностями камеры (zoom, focusDistance и т.д.).
-
-```javascript
-window.dataMatrixApp.on.camCapabilities = function (capabilities) {
-  console.log("Возможности камеры:", capabilities);
-  // capabilities.zoom - поддерживает ли камера зум
-  // capabilities.focusDistance - поддерживает ли камера фокус
-};
 ```
 
 ### Пример интеграции в поп-ап
