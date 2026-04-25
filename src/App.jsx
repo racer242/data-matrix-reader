@@ -62,6 +62,9 @@ function App() {
           // Вычисляем новый уровень зума
           let newZoom = currentZoom + (percent / 100) * (maxZoom - minZoom);
 
+          // Округляем до шага
+          newZoom = Math.round(newZoom / step) * step;
+
           // Зацикленность: если вышли за границы, переключаемся на противоположный конец
           if (loop) {
             if (newZoom > maxZoom) {
@@ -72,9 +75,6 @@ function App() {
           } else {
             newZoom = Math.max(minZoom, Math.min(maxZoom, newZoom));
           }
-
-          // Округляем до шага
-          newZoom = Math.round(newZoom / step) * step;
 
           // Сохраняем новое значение
           currentZoomRef.current = newZoom;
@@ -122,6 +122,9 @@ function App() {
             let newFocus =
               currentFocusDistance + (percent / 100) * (maxFocus - minFocus);
 
+            // Округляем до шага
+            newFocus = Math.round(newFocus / step) * step;
+
             // Зацикленность: если вышли за границы, переключаемся на противоположный конец
             if (loop) {
               if (newFocus > maxFocus) {
@@ -132,9 +135,6 @@ function App() {
             } else {
               newFocus = Math.max(minFocus, Math.min(maxFocus, newFocus));
             }
-
-            // Округляем до шага
-            newFocus = Math.round(newFocus / step) * step;
 
             // Сохраняем новое значение
             currentFocusDistanceRef.current = newFocus;
