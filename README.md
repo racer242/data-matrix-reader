@@ -266,10 +266,15 @@ window.dataMatrixApp.restart();
 
 ### Управление камерой
 
-#### camZoom(percent)
+#### camZoom(percent, loop)
 
 Изменяет зум камеры на указанный процент от диапазона.
 Положительное значение приближает, отрицательное отдаляет.
+
+**Параметры:**
+
+- `percent` (number) — процент изменения от диапазона зума
+- `loop` (boolean, по умолчанию `false`) — если `true`, при достижении максимума переключается на минимум и наоборот
 
 ```javascript
 // Приблизить на 10%
@@ -277,19 +282,42 @@ window.dataMatrixApp.camZoom(10);
 
 // Отдалить на 10%
 window.dataMatrixApp.camZoom(-10);
+
+// С зацикленностью: при превышении максимума перейдёт на минимум
+window.dataMatrixApp.camZoom(10, true);
 ```
 
-#### camFocus(focusDistance)
+#### camFocus(focusDistance, loop)
 
 Устанавливает расстояние фокуса камеры.
 Значение `0` включает автофокус, любое другое значение переключает на ручной режим.
+
+**Параметры:**
+
+- `focusDistance` (number) — процент изменения от диапазона фокуса
+- `loop` (boolean, по умолчанию `false`) — если `true`, при достижении границ переключается на противоположную
 
 ```javascript
 // Автофокус
 window.dataMatrixApp.camFocus(0);
 
-// Ручной фокус (0.5 - среднее значение)
-window.dataMatrixApp.camFocus(0.5);
+// Ручной фокус
+window.dataMatrixApp.camFocus(10);
+
+// С зацикленностью
+window.dataMatrixApp.camFocus(10, true);
+```
+
+#### camCapabilities(capabilities)
+
+Вызывается при готовности камеры. Содержит объект с возможностями камеры (zoom, focusDistance и т.д.).
+
+```javascript
+window.dataMatrixApp.on.camCapabilities = function (capabilities) {
+  console.log("Возможности камеры:", capabilities);
+  // capabilities.zoom - поддерживает ли камера зум
+  // capabilities.focusDistance - поддерживает ли камера фокус
+};
 ```
 
 ### Пример интеграции в поп-ап
