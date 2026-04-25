@@ -67,10 +67,24 @@
       }, 100);
     });
   </script>
-  <button id="zoomIn" onclick="window.dataMatrixApp.camZoom(+10)">z+</button>
-  <button id="zoomOut" onclick="window.dataMatrixApp.camZoom(-10)">z-</button>
-  <button id="focusIn" onclick="window.dataMatrixApp.camFocus(+10)">f+</button>
-  <button id="focusOut" onclick="window.dataMatrixApp.camFocus(-10)">f-</button>
+  <style>
+    #zoomIn,
+    #zoomOut {
+      display: none;
+    }
+
+    #focusIn,
+    #focusOut,
+    #focusAuto,
+    #focusMax,
+    #focusMin {
+      display: none;
+    }
+  </style>
+  <button id="zoomIn" onclick="window.dataMatrixApp.camZoom(+10,true)">z+</button>
+  <button id="zoomOut" onclick="window.dataMatrixApp.camZoom(-10,true)">z-</button>
+  <button id="focusIn" onclick="window.dataMatrixApp.camFocus(+10,true)">f+</button>
+  <button id="focusOut" onclick="window.dataMatrixApp.camFocus(-10,true)">f-</button>
   <button id="focusAuto" onclick="window.dataMatrixApp.camFocus(0)">af</button>
   <button id="focusMax" onclick="window.dataMatrixApp.camFocus(+100)">maxf</button>
   <button id="focusMin" onclick="window.dataMatrixApp.camFocus(-100)">minf</button>
