@@ -97,6 +97,9 @@ window.dataMatrixApp = {
     camAccessSuccess: function (cameraData) {
       console.log("camAccessSuccess:", cameraData);
     },
+    camCapabilities: function (capabilities) {
+      console.log("camCapabilities:", capabilities);
+    },
     camStarting: function () {
       console.log("camStarting");
     },

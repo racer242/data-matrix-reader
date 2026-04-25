@@ -16,6 +16,8 @@ function App() {
     const capabilities = track.getCapabilities();
     const settings = track.getSettings();
     cameraCapabilitiesRef.current = capabilities;
+    const app = window.dataMatrixApp;
+    app.on.camCapabilities?.(capabilities);
 
     // Инициализируем начальные значения
     if (capabilities.zoom) {
